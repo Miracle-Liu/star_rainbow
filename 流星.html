@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #cvs {
+            background-color: #000;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="cvs">浏览器不支持canvas</canvas>
+    <script>
+        var cvs = document.getElementById("cvs");
+        var ctx = cvs.getContext("2d");
+
+        //1.设置画布宽高，并随浏览器窗口改变而改变
+        var w = cvs.width = window.innerWidth;
+        var h = cvs.height = window.innerHeight;
+        var count = 30;
+        var drops = [];
+        window.onresize = function() {
+            var w = cvs.width = window.innerWidth;
+            var h = cvs.height = window.innerHeight;
+        }
+
+
+        //构造函数批量创建对象
+        function Star() {
+
+        }
+        Star.prototype = {
+            init: function() { //初始化方法
+                this.x = random(0, w);
+                this.y = 0;
+                this.a = 1;
+                this.r = 1;
+                this.color = "#off";
+                this.accelerationY = random(3, 5);
+                this.distanceY = random(h * 0.8, h * 0.9);
+                this.accelerationR = 1;
+                this.accelerationA = 0.96;
+            },
+
+            draw: function() {
+                if (this.y > this.distanceY) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+                    ctx.strokeStyle = "rgba(0,255,255," + this.a + ")";
+                    ctx.stroke();
+                } else {
+                    ctx.fillStyle = color(this.a);
+                    ctx.fillRect(this.x, this.y, 2, 10);
+                }
+
+                this.update();
+            },
+
+            update: function() {
+                if (this.y < this.distanceY) {
+                    this.y += this.accelerationY;
+                } else {
+                    if (this.a > 0.03) {
+                        this.r += this.accelerationR;
+                        if (this.r > 50) {
+                            this.a *= this.accelerationA;
+                        }
+                    } else {
+                        this.init();
+                    }
+                }
+            }
+        }
+
+
+        //工具包
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function color(a) {
+            var r = Math.floor(Math.random() * 256);
+            var g = Math.floor(Math.random() * 256);
+            var b = Math.floor(Math.random() * 256);
+            return "rgba(" + r + "," + g + "," + b + "," + a + ")";
+        }
+
+        function start() {
+            for (var i = 0; i < count; i++) {
+                (function(j) {
+                    setTimeout(function() {
+                        var star = new Star();
+                        star.init();
+                        drops.push(star);
+                    }, j * 100);
+                })(i);
+            }
+        }
+
+        function move() {
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.fillRect(0, 0, w, h);
+            for (var i = 0; i < drops.length; i++) {
+                drops[i].draw();
+            }
+            requestAnimationFrame(move);
+        }
+        //创建对象
+        start();
+        move();
+    </script>
+</body>
+
+</html>
